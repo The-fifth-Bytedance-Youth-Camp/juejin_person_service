@@ -4,19 +4,24 @@
   "private": true,
   "scripts": {
     "dev": "nodemon ./bin/www",
-    "start": "node ./bin/www"
+    "start": "pm2 start ecosystem.config.js",
+    "stop": "pm2 stop juejin_person_service && pm2 delete juejin_person_service",
+    "watch": "pm2 monit"
   },
   "dependencies": {
     "ali-mysql-client": "^1.0.7",
     "body-parser": "^1.20.1",
     "cookie-parser": "~1.4.4",
     "debug": "^4.3.4",
+    "dotenv": "^16.0.3",
     "express": "^4.16.4",
     "express-jwt": "^8.3.0",
     "jsonwebtoken": "^9.0.0",
     "md5": "^2.3.0",
     "morgan": "~1.9.1",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "node-cron": "^3.0.2",
+    "rotating-file-stream": "^3.0.4"
   },
   "devDependencies": {
     "eslint": "^8.22.0",
