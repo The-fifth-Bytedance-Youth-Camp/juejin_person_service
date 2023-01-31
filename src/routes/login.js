@@ -6,67 +6,66 @@ const dotenv = require('dotenv');
 const md5 = require('md5');
 
 dotenv.config();
-const secretKey = process.env.JWT_SECRET_KEY;
 
-//用户登录
-router.post('/', async (req, res) => {
-    const { id, password } = req.body;
-    if (!id || !password) {
-        res.json({
-            code: 401,
-            msg: '用户名与密码为必传参数',
-        });
-        return;
-    }
-    //判断该id是否属于管理员
-    try {
-        const isAdmin = await database.select('*')
-            .from('admin')
-            .where('id', id)
-            .queryRow();
-        const ans = md5(password) === isAdmin.password;
-        //若属于管理员
-        if (ans) {
-            //生成token
-            const tokenStr = jwt.sign({ userid: id }, secretKey, { expiresIn: '30days' });
+// 用户名密码登录
+function byPassword(table) {
+    const isAdmin = table === 'admin';
+    return async (req, res) => {
+        let { name, password } = req.body;
+        if (!name || !password) {
             res.json({
-                code: 200,
-                msg: '登录成功',
-                token: tokenStr,
+                code: 401,
+                msg: '用户名与密码为必传参数',
             });
-        } else {
+            return;
+        }
+        password = md5(password);
+        try {
+            const result = await database
+                .select('*')
+                .from(table)
+                .where('name', name)
+                .where('password', password)
+                .queryRow();
+            if (result) {
+                const token = jwt.sign(
+                    { id: result?.id, name, isAdmin },
+                    process.env.JWT_SECRET_KEY,
+                    { expiresIn: '30days' },
+                );
+                res.json({
+                    code: 200,
+                    msg: '登录成功',
+                    token,
+                });
+                return;
+            }
             res.json({
                 code: 400,
                 msg: '登录失败，用户名或密码错误',
             });
+        } catch ({ message }) {
+            res.json({
+                code: 500,
+                msg: `服务端错误: ${ message }`,
+            });
         }
-    } catch (error) {
-        console.log('判断该用户是否属于普通用户');
-    }
+    };
+}
 
-    //判断该用户是否是普通用户
-    try {
-        const isUser = await database.select('*')
-            .from('user')
-            .where('id', id)
-            .queryRow();
-        const ans = md5(password) === isUser.password;
-        if (ans) {
-            const tokenStr = jwt.sign({ userid: id }, secretKey, { expiresIn: '3h' });
-            res.json({
-                code: 200,
-                msg: '登录成功',
-                token: tokenStr,
-            });
-        } else {
-            res.json({
-                code: 400,
-                msg: '登录失败，用户名或密码错误',
-            });
-        }
-    } catch (err) {
-        console.log(err);
-    }
+// 邮箱验证码登录
+function byEmail(table) {
+    return (req, res) => {
+        res.json({ table });
+    };
+}
+
+router.get('/', (req, res) => {
+    res.send({});
 });
+
+router.post('/admin/password', byPassword('admin'));
+router.post('/user/password', byPassword('user'));
+router.post('/admin/email', byEmail('admin'));
 
 module.exports = router;
