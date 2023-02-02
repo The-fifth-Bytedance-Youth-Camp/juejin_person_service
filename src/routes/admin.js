@@ -8,11 +8,11 @@ router.post('/insert', async (req, res) => {
     if (password) password = md5(password);
     try {
         const result = await database
-            .insert('user', { ...req.body, password, is_allow: 0 })
+            .insert('admin', { ...req.body, password, is_allow: 0 })
             .execute();
-        res.json({ success: true, result });
-    } catch (err) {
-        res.json({ success: false, err });
+        res.json({ code: 200, ...result });
+    } catch ({ message }) {
+        res.json({ code: 503, err: message });
     }
 });
 
@@ -30,9 +30,9 @@ router.post('/allow', async (req, res) => {
         const result = await database
             .update('admin', { is_allow: 1 })
             .where('id', id).execute();
-        res.json({ success: true, result });
-    } catch (err) {
-        res.json({ success: false, err });
+        res.json({ code: 200, ...result });
+    } catch ({ message }) {
+        res.json({ code: 503, err: message });
     }
 });
 
@@ -51,9 +51,9 @@ router.get('/allow/list', async (req, res) => {
             .from('admin')
             .where('is_allow', 0)
             .queryListWithPaging(page, rows);
-        res.json({ success: true, result });
-    } catch (err) {
-        res.json({ success: false, err });
+        res.json({ code: 200, ...result });
+    } catch ({ message }) {
+        res.json({ code: 503, err: message });
     }
 });
 

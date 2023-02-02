@@ -35,7 +35,7 @@ app.use(expressJwt.expressjwt({
     algorithms: [ 'HS256' ],
 }).unless({
     // 不需要验证的接口名称
-    path: [ '/', /^\/login\/.*/ ],
+    path: [ '/', /^\/upload\/.*/, /^\/login\/.*/, /\/insert$/ ],
 }));
 app.use(cookieParser());
 app.use(express.json());

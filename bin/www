@@ -8,11 +8,7 @@ const app = require('../src');
 const debug = require('debug')('juejin-post-service:server');
 const http = require('http');
 const dotenv = require('dotenv');
-// const { getRoutes } = require('get-routes');
 dotenv.config();
-
-// 打印路由表
-// console.log(getRoutes(app));
 
 /**
  * Get port from environment and store in Express.
