@@ -10,7 +10,7 @@ app.use('/user', userRouter);
 app.use('/admin', adminRouter);
 app.use('/upload', uploadRouter);
 
-// token失效错误处理
+// 错误处理
 app.use(errorCatch);
 
 module.exports = app;
