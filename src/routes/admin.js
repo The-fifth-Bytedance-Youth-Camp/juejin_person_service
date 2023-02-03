@@ -1,14 +1,16 @@
 const { withCRUD } = require('../utils/routerFactory');
 const md5 = require('md5');
 const database = require('../utils/database');
+const moment = require('moment/moment');
 const router = withCRUD('admin');
 
 router.post('/insert', async (req, res) => {
     let { password } = req.body;
     if (password) password = md5(password);
+    const gmt_created = moment().format('YYYY-MM-DD HH:mm:ss');
     try {
         const result = await database
-            .insert('admin', { ...req.body, password, is_allow: 0 })
+            .insert('admin', { ...req.body, password, is_allow: 0, gmt_created })
             .execute();
         res.json({ code: 200, ...result });
     } catch ({ message }) {

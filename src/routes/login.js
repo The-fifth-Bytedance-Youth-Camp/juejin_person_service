@@ -60,12 +60,9 @@ function byEmail(table) {
     };
 }
 
-router.get('/', (req, res) => {
-    res.send({});
-});
-
 router.post('/admin/password', byPassword('admin'));
 router.post('/user/password', byPassword('user'));
 router.post('/admin/email', byEmail('admin'));
+router.post('/user/email', byEmail('user'));
 
 module.exports = router;
