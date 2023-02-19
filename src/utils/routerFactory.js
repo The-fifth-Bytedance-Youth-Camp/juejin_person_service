@@ -40,7 +40,7 @@ function withCRUD(table) {
         }
     });
 
-    // 根据 id 查找数据
+    // 根据 id 查找当前用户数据
     router.get('/find', async (req, res) => {
         let { id } = req.auth;
         try {
@@ -52,6 +52,38 @@ function withCRUD(table) {
             if (!result) throw new Error('找不到数据');
             delete result?.password;
             res.json({ code: 200, ...result });
+        } catch ({ message }) {
+            res.json({ code: 503, msg: message });
+        }
+    });
+
+     // 根据 id 查找数据
+     router.get('/search', async (req, res) => {
+        let { id } = req.query;
+        try {
+            const result = await database
+                .select('*')
+                .from(table)
+                .where('id', id)
+                .queryRow();
+            if (!result) throw new Error('找不到数据');
+            delete result?.password;
+            res.json({ code: 200, result: [ { ...result } ] });
+        } catch ({ message }) {
+            res.json({ code: 503, msg: message });
+        }
+    });
+
+    //查找表中全部数据
+    router.get('/searchall', async (req, res) => {
+        try {
+            const result = await database
+                .select('*')
+                .from(table)
+                .queryList();
+            if (!result) throw new Error('找不到数据');
+            delete result?.password;
+            res.json({ code: 200, result: [ { ...result } ] });
         } catch ({ message }) {
             res.json({ code: 503, msg: message });
         }

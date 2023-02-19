@@ -5,6 +5,7 @@ const cron = require('node-cron');
 const fs = require('fs');
 const rotatingFileStream = require('rotating-file-stream');
 const morgan = require('morgan');
+const cors = require('cors');
 const dotenv = require('dotenv');
 const expressJwt = require('express-jwt');
 dotenv.config();
@@ -37,6 +38,7 @@ app.use(expressJwt.expressjwt({
     // 不需要验证的接口名称
     path: [ '/', /^\/upload\/.*/, /^\/login\/.*/, /\/insert$/ ],
 }));
+app.use(cors({ origin: `http://localhost:${ process.env.CORS_ORIGIN_PORT }` }));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
