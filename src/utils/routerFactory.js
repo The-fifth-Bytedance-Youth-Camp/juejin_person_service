@@ -60,19 +60,45 @@ function withCRUD(table) {
      // 根据 id 查找数据
      router.get('/search', async (req, res) => {
         let { id } = req.query;
-        try {
-            const result = await database
-                .select('*')
-                .from(table)
-                .where('id', id)
-                .queryRow();
-            if (!result) throw new Error('找不到数据');
-            delete result?.password;
-            res.json({ code: 200, result: [ { ...result } ] });
-        } catch ({ message }) {
-            res.json({ code: 503, msg: message });
+        const { keyword, field = 'name' } = req.query;
+        let keywordStr = '';
+        keyword.split(' ').forEach(keyword => {
+            keywordStr += `%${ keyword }%`;
+        });
+        if(id===''&&keywordStr===''){
+            res.json({
+                code:200,
+                msg: '查找条件不能为空',
+            });
         }
+        else if(id!==''){
+            try {
+                const result = await database
+                    .select('*')
+                    .from(table)
+                    .where('id', id)
+                    .queryRow();
+                if (!result) throw new Error('找不到数据');
+                delete result?.password;
+                res.json({ code: 200, result: [ { ...result } ] });
+            } catch ({ message }) {
+                res.json({ code: 503, msg: message });
+            }
+        }else{
+            try {
+                const result = await database.sql(`
+                    SELECT *
+                    FROM ${ table }
+                    WHERE ${ field } LIKE '${ keywordStr }'
+                `).execute();
+                res.json({ code: 200, result  });
+            } catch (err) {
+                res.json({ code: 500, err: err.message });
+            }
+        }
+        
     });
+
 
     //查找表中全部数据
     router.get('/searchall', async (req, res) => {
